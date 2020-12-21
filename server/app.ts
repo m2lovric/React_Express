@@ -1,11 +1,34 @@
-import { Application } from "https://deno.land/x/abc@v1.2.4/mod.ts";
-import { cors, DefaultCORSConfig } from "https://deno.land/x/abc@v1.0.2/middleware/cors.ts";
-import { getBlogs } from './controllers/blogController.ts';
+import express from 'express';
+import {v4} from 'uuid';
 
-const app = new Application();
+interface Blog {
+  id: string,
+  title: string,
+  content: string,
+  author: string
+}
 
-app
-  .use(cors(DefaultCORSConfig))
-  .file('/', './public/index.html')
-  .get('/blogs', getBlogs)
-  .start({ port: 8080 });
+const app = express();
+const PORT = 8000;
+
+const blogs: Blog[] = [
+  {id: v4(), title: 'Blog tutorial', content: 'Something', author: 'Matteo'}
+]
+
+app.get('/', (req,res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+app.get('/blogs', (req, res) => {
+  res.json(blogs);
+})
+
+app.get('/blogs/:id', (req, res) => {
+  const {id} = req.params;
+  const blog = blogs.find(el => el.id === id);
+  res.json(blog);
+})
+
+app.listen(PORT, () => {
+  console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+});
